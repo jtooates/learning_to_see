@@ -62,7 +62,9 @@ class VAELoss(nn.Module):
 
         # KL divergence loss
         # KL(N(mu, sigma) || N(0, 1)) = -0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
-        kl_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+        # Clamp logvar to prevent numerical instability
+        logvar_clamped = torch.clamp(logvar, min=-10, max=10)
+        kl_loss = -0.5 * torch.sum(1 + logvar_clamped - mu.pow(2) - logvar_clamped.exp())
         kl_loss = kl_loss / target.size(0)  # Normalize by batch size
 
         # Apply KL weight (with optional annealing)

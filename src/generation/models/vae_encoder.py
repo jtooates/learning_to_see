@@ -68,6 +68,9 @@ class VAEEncoder(nn.Module):
         self.fc_mu = nn.Linear(self.flatten_dim, latent_dim)
         self.fc_logvar = nn.Linear(self.flatten_dim, latent_dim)
 
+        # Initialize weights
+        self._initialize_weights()
+
     def forward(self, images: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """
         Encode images to latent distribution parameters.
@@ -90,7 +93,24 @@ class VAEEncoder(nn.Module):
         mu = self.fc_mu(flattened)
         logvar = self.fc_logvar(flattened)
 
+        # Clamp logvar to prevent numerical instability
+        logvar = torch.clamp(logvar, min=-10, max=10)
+
         return mu, logvar
+
+    def _initialize_weights(self):
+        """Initialize weights for better training stability."""
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='leaky_relu')
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
+            elif isinstance(m, nn.BatchNorm2d):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
+            elif isinstance(m, nn.Linear):
+                nn.init.normal_(m.weight, 0, 0.01)
+                nn.init.constant_(m.bias, 0)
 
     def reparameterize(self, mu: torch.Tensor, logvar: torch.Tensor) -> torch.Tensor:
         """
