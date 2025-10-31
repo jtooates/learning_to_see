@@ -51,30 +51,29 @@ class CaptionGenerator:
         Returns:
             Description string
         """
-        templates = [
-            "{article} {size} {color} {shape}",
-            "{article} {color} {shape} ({size})",
-            "{article} {size} {color} {shape_plural}",
-        ]
-
-        template = random.choice(templates)
-
         # Handle plurality
         if obj.quantity == 1:
             article = self._get_article(obj.color)
             shape = obj.shape_type.value
-            shape_plural = obj.shape_type.value
+            templates = [
+                "{article} {size} {color} {shape}",
+                "{article} {color} {shape} ({size})",
+            ]
         else:
             article = str(obj.quantity)
-            shape = obj.shape_type.value
-            shape_plural = self._pluralize(obj.shape_type.value)
+            shape = self._pluralize(obj.shape_type.value)
+            templates = [
+                "{article} {size} {color} {shape}",
+                "{article} {color} {shape} ({size})",
+            ]
+
+        template = random.choice(templates)
 
         return template.format(
             article=article,
             size=obj.size.value,
             color=obj.color,
             shape=shape,
-            shape_plural=shape_plural,
         )
 
     def _describe_multiple_objects(self, scene: Scene) -> str:
