@@ -53,7 +53,10 @@ src/
 │   ├── renderer.py # Image rendering
 │   └── dataset.py  # PyTorch Dataset
 ├── captioning/     # Future: image → caption models
-└── generation/     # Future: caption → image models
+└── generation/     # ✅ Caption → image generation (Conditional VAE)
+    ├── models/     # Model architectures
+    ├── training/   # Training loop, losses, metrics
+    └── utils/      # Tokenizer, visualization
 ```
 
 ## Example Outputs
@@ -62,6 +65,35 @@ The generator creates diverse scenes like:
 - "a large blue square above 3 small red triangles"
 - "2 medium green circles to the left of a yellow rectangle"
 - "a small purple triangle below 4 large orange squares"
+
+## Image Generation Model
+
+This project includes a **Conditional VAE** model for caption-to-image generation:
+
+### Quick Start
+
+```bash
+# Test the model architecture
+python scripts/test_model.py
+
+# Train the model
+python scripts/train_generator.py
+```
+
+### Model Architecture
+
+- **Text Encoder**: LSTM-based encoder for captions
+- **VAE Encoder**: CNN encoder (image → latent distribution)
+- **VAE Decoder**: Transposed CNN decoder (caption + latent → image)
+- **Loss**: Reconstruction loss (MSE/L1) + KL divergence
+
+### Training
+
+The model trains on synthetic (image, caption) pairs and learns to:
+1. **Reconstruct** images from captions (with image as reference)
+2. **Generate** novel images from captions alone
+
+See `USAGE.md` for detailed documentation.
 
 ## License
 
