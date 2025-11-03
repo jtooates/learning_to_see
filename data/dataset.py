@@ -247,10 +247,10 @@ def collate_fn(batch: List[Dict[str, torch.Tensor]]) -> Dict[str, torch.Tensor]:
     texts = [item['text'] for item in batch]
 
     return {
-        'images': images,
+        'image': images,  # Use singular for consistency
         'input_ids': input_ids,
         'attention_mask': attention_mask,
-        'texts': texts
+        'text': texts  # Use singular for consistency
     }
 
 
