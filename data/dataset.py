@@ -79,7 +79,8 @@ class SceneDataset(Dataset):
             return self._shard_cache[shard_idx]
 
         # Load shard data
-        images = torch.load(self.data_dir / f'images_{shard_idx:04d}.pt')
+        # Note: weights_only=False is safe here as we're loading our own generated data
+        images = torch.load(self.data_dir / f'images_{shard_idx:04d}.pt', weights_only=False)
 
         texts = []
         with open(self.data_dir / f'texts_{shard_idx:04d}.jsonl', 'r') as f:
@@ -91,7 +92,7 @@ class SceneDataset(Dataset):
             for line in f:
                 graphs.append(json.loads(line))
 
-        metadata = torch.load(self.data_dir / f'meta_{shard_idx:04d}.pt')
+        metadata = torch.load(self.data_dir / f'meta_{shard_idx:04d}.pt', weights_only=False)
 
         shard_data = {
             'images': images,
