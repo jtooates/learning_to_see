@@ -1,0 +1,39 @@
+Scene DSL Grammar (EBNF)
+=========================
+
+S            := MAIN "." ;
+
+MAIN         := COUNT_SENT | REL_SENT ;
+
+COUNT_SENT   := "There" VERB_COUNT NUMBER COLOR SHAPE PLURAL_OPT ;
+VERB_COUNT   := "is" | "are" ;
+PLURAL_OPT   := "" | "s" ;
+
+REL_SENT     := "The" COLOR SHAPE VERB_REL REL "the" COLOR SHAPE ;
+VERB_REL     := "is" | "are" ;
+REL          := "left of" | "right of" | "on" | "in front of" ;
+
+NUMBER       := "one" | "two" | "three" | "four" | "five" ;
+COLOR        := "red" | "green" | "blue" | "yellow" ;
+SHAPE        := "ball" | "cube" | "block" ;
+
+Semantic Constraints:
+---------------------
+1. COUNT_SENT plurality:
+   - "one" → "is" (no 's')
+   - "two"|"three"|"four"|"five" → "are" + 's'
+
+2. REL_SENT constraints (v1):
+   - Both objects have count=1
+   - Verb is "is" for singular objects
+
+Examples:
+---------
+COUNT_SENT:
+  There is one red ball.
+  There are three blue cubes.
+
+REL_SENT:
+  The red ball is left of the blue cube.
+  The green block is on the yellow ball.
+  The blue cube is in front of the red block.
