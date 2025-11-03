@@ -52,22 +52,18 @@ pip install -r requirements.txt
 ### Generate Data
 
 ```bash
-# Random split (IID)
+# Random split (IID) - generates 6000 samples, split 80/10/10 train/val/test
 python -m data.gen \
-    --output_dir ./data/scenes \
-    --num_train 5000 \
-    --num_val 500 \
-    --num_test 500 \
-    --split random \
+    --out_dir ./data/scenes \
+    --n 6000 \
+    --split_strategy random \
     --seed 42
 
 # Compositional splits
 python -m data.gen \
-    --output_dir ./data/scenes_color_holdout \
-    --num_train 5000 \
-    --num_val 500 \
-    --num_test 500 \
-    --split color_shape \
+    --out_dir ./data/scenes_color_holdout \
+    --n 6000 \
+    --split_strategy color_shape \
     --seed 42
 ```
 
