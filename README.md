@@ -23,11 +23,11 @@ This project implements a full vision-language learning system:
 
 ## Quick Start (Google Colab)
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/YOUR_USERNAME/learning_to_see/blob/main/train_captioner.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/jtooates/learning_to_see/blob/main/train_captioner.ipynb)
 
 ```python
 # In Colab, run this cell:
-!git clone https://github.com/YOUR_USERNAME/learning_to_see.git
+!git clone https://github.com/jtooates/learning_to_see.git
 %cd learning_to_see
 !pip install -r requirements.txt
 ```
@@ -42,7 +42,7 @@ Then open and run `train_captioner.ipynb` - it includes:
 ## Local Installation
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/learning_to_see.git
+git clone https://github.com/jtooates/learning_to_see.git
 cd learning_to_see
 pip install -r requirements.txt
 ```
@@ -287,9 +287,9 @@ If you use this code, please cite:
 ```bibtex
 @misc{learning_to_see,
   title={Learning to See: Vision-Language Learning on Synthetic Scenes},
-  author={Your Name},
+  author={J. T. Oates},
   year={2024},
-  howpublished={\url{https://github.com/YOUR_USERNAME/learning_to_see}}
+  howpublished={\url{https://github.com/jtooates/learning_to_see}}
 }
 ```
 

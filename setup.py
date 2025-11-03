@@ -7,12 +7,12 @@ with open("README.md", "r", encoding="utf-8") as fh:
 setup(
     name="learning_to_see",
     version="0.1.0",
-    author="Your Name",
-    author_email="your.email@example.com",
+    author="J. T. Oates",
+    author_email="jtooates@users.noreply.github.com",
     description="Vision-language learning on synthetic scenes with compositional generalization",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/YOUR_USERNAME/learning_to_see",
+    url="https://github.com/jtooates/learning_to_see",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 3 - Alpha",
