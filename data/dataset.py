@@ -62,6 +62,8 @@ class SceneDataset(Dataset):
 
         self.n_shards = self.manifest['n_shards']
         self.shard_size = self.manifest['shard_size']
+        # Use actual shard sizes if available (handles rendering failures)
+        self.shard_sizes = self.manifest.get('shard_sizes', None)
 
         # Cache for loaded shards
         self._shard_cache = {}
@@ -121,8 +123,22 @@ class SceneDataset(Dataset):
             Sample dictionary
         """
         # Determine which shard
-        shard_idx = global_idx // self.shard_size
-        within_shard_idx = global_idx % self.shard_size
+        if self.shard_sizes is not None:
+            # Use actual shard sizes (handles rendering failures)
+            shard_idx = 0
+            cumulative = 0
+            for i, size in enumerate(self.shard_sizes):
+                if global_idx < cumulative + size:
+                    shard_idx = i
+                    within_shard_idx = global_idx - cumulative
+                    break
+                cumulative += size
+            else:
+                raise IndexError(f"Global index {global_idx} out of range")
+        else:
+            # Fallback to uniform shard size
+            shard_idx = global_idx // self.shard_size
+            within_shard_idx = global_idx % self.shard_size
 
         # Load shard
         shard_data = self._load_shard(shard_idx)

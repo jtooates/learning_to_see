@@ -241,6 +241,7 @@ def main():
     # Generate data in shards
     print("\nGenerating data shards...")
     total_stats = {"success": 0, "failed": 0}
+    shard_sizes = []  # Track actual size of each shard
 
     n_shards = (args.n + args.shard_size - 1) // args.shard_size
 
@@ -268,11 +269,15 @@ def main():
         total_stats["success"] += stats["success"]
         total_stats["failed"] += stats["failed"]
 
+        # Record actual shard size (some samples may have failed)
+        shard_sizes.append(stats["success"])
+
     # Save manifest
     manifest = {
         'n_samples': args.n,
         'n_shards': n_shards,
         'shard_size': args.shard_size,
+        'shard_sizes': shard_sizes,  # Actual size of each shard
         'image_size': args.image_size,
         'seed': args.seed,
         'split_strategy': args.split_strategy,
