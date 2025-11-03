@@ -45,7 +45,9 @@ def generate_shard(scene_graphs: List[Dict[str, Any]],
                    shard_idx: int,
                    out_dir: Path,
                    renderer: SceneRenderer,
-                   parser: SceneParser) -> Dict[str, int]:
+                   parser: SceneParser,
+                   all_graphs: List[Dict[str, Any]],
+                   seed: int) -> Dict[str, int]:
     """Generate a single data shard.
 
     Args:
@@ -54,6 +56,8 @@ def generate_shard(scene_graphs: List[Dict[str, Any]],
         out_dir: Output directory
         renderer: SceneRenderer instance
         parser: SceneParser instance
+        all_graphs: All possible scene graphs (for retry sampling)
+        seed: Random seed for retry sampling
 
     Returns:
         Statistics dictionary
@@ -63,9 +67,26 @@ def generate_shard(scene_graphs: List[Dict[str, Any]],
     graphs = []
     metadata_list = []
 
-    stats = {"success": 0, "failed": 0}
+    stats = {"success": 0, "failed": 0, "retries": 0}
 
-    for graph in tqdm(scene_graphs, desc=f"Shard {shard_idx}"):
+    # Create RNG for retry sampling
+    rng = random.Random(seed + shard_idx + 10000)  # Offset to avoid collision
+
+    target_count = len(scene_graphs)
+    graph_idx = 0
+
+    pbar = tqdm(total=target_count, desc=f"Shard {shard_idx}")
+
+    while len(images) < target_count:
+        # Get next graph to try
+        if graph_idx < len(scene_graphs):
+            graph = scene_graphs[graph_idx]
+            graph_idx += 1
+        else:
+            # We've exhausted original graphs, sample a new one for retry
+            graph = rng.choice(all_graphs)
+            stats["retries"] += 1
+
         try:
             # Canonicalize to text
             canonical_text = to_canonical(graph)
@@ -100,11 +121,14 @@ def generate_shard(scene_graphs: List[Dict[str, Any]],
             metadata_list.append(meta_dict)
 
             stats["success"] += 1
+            pbar.update(1)
 
         except Exception as e:
-            print(f"Failed to render graph: {e}")
             stats["failed"] += 1
+            # Don't print every failure, just count them
             continue
+
+    pbar.close()
 
     # Save shard
     if images:
@@ -211,6 +235,11 @@ def main():
         seed=args.seed
     )
 
+    # Get all possible scene graphs for retry sampling
+    print("\nEnumerating all possible scene graphs...")
+    all_graphs = enumerate_all_samples()
+    print(f"Total possible scenes: {len(all_graphs)}")
+
     # Sample scene graphs
     print("\nSampling scene graphs...")
     scene_graphs = sample_scene_graphs(args.n, seed=args.seed)
@@ -263,13 +292,16 @@ def main():
             shard_idx,
             out_dir,
             renderer,
-            scene_parser
+            scene_parser,
+            all_graphs,
+            args.seed
         )
 
         total_stats["success"] += stats["success"]
         total_stats["failed"] += stats["failed"]
+        total_stats["retries"] = total_stats.get("retries", 0) + stats.get("retries", 0)
 
-        # Record actual shard size (some samples may have failed)
+        # Record actual shard size (should always equal len(shard_graphs) now)
         shard_sizes.append(stats["success"])
 
     # Save manifest
@@ -288,7 +320,8 @@ def main():
         json.dump(manifest, f, indent=2)
 
     print(f"\nGeneration complete!")
-    print(f"Success: {total_stats['success']}, Failed: {total_stats['failed']}")
+    print(f"Success: {total_stats['success']}, Failed: {total_stats['failed']}, Retries: {total_stats.get('retries', 0)}")
+    print(f"Total samples generated: {total_stats['success']} (target: {args.n})")
     print(f"Data saved to: {out_dir}")
 
 
