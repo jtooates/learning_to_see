@@ -258,7 +258,8 @@ def create_dataloaders(data_dir: str,
                        batch_size: int = 32,
                        num_workers: int = 4,
                        vocab: Optional[Vocab] = None,
-                       augment_train: bool = True) -> Tuple[torch.utils.data.DataLoader, ...]:
+                       augment_train: bool = True,
+                       pin_memory: bool = True) -> Tuple[torch.utils.data.DataLoader, ...]:
     """Create train, val, test dataloaders.
 
     Args:
@@ -267,6 +268,7 @@ def create_dataloaders(data_dir: str,
         num_workers: Number of workers for DataLoader
         vocab: Vocabulary instance
         augment_train: Whether to apply augmentation to training data
+        pin_memory: Whether to use pinned memory (faster GPU transfer)
 
     Returns:
         Tuple of (train_loader, val_loader, test_loader)
@@ -295,7 +297,7 @@ def create_dataloaders(data_dir: str,
         shuffle=True,
         num_workers=num_workers,
         collate_fn=collate_fn,
-        pin_memory=True
+        pin_memory=pin_memory
     )
 
     val_loader = torch.utils.data.DataLoader(
@@ -304,7 +306,7 @@ def create_dataloaders(data_dir: str,
         shuffle=False,
         num_workers=num_workers,
         collate_fn=collate_fn,
-        pin_memory=True
+        pin_memory=pin_memory
     )
 
     test_loader = torch.utils.data.DataLoader(
@@ -313,7 +315,7 @@ def create_dataloaders(data_dir: str,
         shuffle=False,
         num_workers=num_workers,
         collate_fn=collate_fn,
-        pin_memory=True
+        pin_memory=pin_memory
     )
 
     return train_loader, val_loader, test_loader
