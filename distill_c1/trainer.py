@@ -420,12 +420,18 @@ class DistillTrainer:
                     eta = (total_steps - self.step) / steps_per_sec
 
                     train_avg = self.train_metrics.get_averages()
-                    print(f"Step {self.step}/{total_steps} | "
-                          f"Loss: {train_avg['total']:.6f} | "
-                          f"L1: {train_avg['l1']:.6f} | "
-                          f"TV: {train_avg['tv']:.6f} | "
-                          f"Steps/s: {steps_per_sec:.2f} | "
-                          f"ETA: {eta/60:.1f}m")
+                    log_msg = (f"Step {self.step}/{total_steps} | "
+                               f"Loss: {train_avg['total']:.6f} | "
+                               f"L1: {train_avg['l1']:.6f} | "
+                               f"L2: {train_avg['l2']:.6f} | "
+                               f"TV: {train_avg['tv']:.6f}")
+
+                    # Add perceptual loss if enabled
+                    if 'perc' in train_avg:
+                        log_msg += f" | Perc: {train_avg['perc']:.6f}"
+
+                    log_msg += f" | Steps/s: {steps_per_sec:.2f} | ETA: {eta/60:.1f}m"
+                    print(log_msg)
 
                     self.train_metrics.reset()
 
@@ -436,7 +442,12 @@ class DistillTrainer:
                     print(f"\n=== Validation at step {self.step} ===")
                     print(f"PSNR: {val_metrics['psnr']:.2f} dB")
                     print(f"SSIM: {val_metrics['ssim']:.4f}")
-                    print(f"Loss: {val_metrics['total']:.6f}")
+                    print(f"Total Loss: {val_metrics['total']:.6f}")
+                    print(f"  L1: {val_metrics['l1']:.6f} | L2: {val_metrics['l2']:.6f} | TV: {val_metrics['tv']:.6f}", end="")
+                    if 'perc' in val_metrics:
+                        print(f" | Perc: {val_metrics['perc']:.6f}")
+                    else:
+                        print()
                     print("=" * 40 + "\n")
 
                     # Save checkpoint
