@@ -135,6 +135,27 @@ class DistillDataset(Dataset):
         }
 
 
+def distill_collate_fn(batch):
+    """
+    Custom collate function for DistillDataset.
+
+    Handles variable-length sequences and graph objects.
+    """
+    token_ids = torch.stack([item['token_ids'] for item in batch])
+    attention_mask = torch.stack([item['attention_mask'] for item in batch])
+    images = torch.stack([item['image'] for item in batch])
+    graphs = [item['graph'] for item in batch]  # Keep as list
+    texts = [item['text'] for item in batch]
+
+    return {
+        'token_ids': token_ids,
+        'attention_mask': attention_mask,
+        'image': images,
+        'graph': graphs,
+        'text': texts,
+    }
+
+
 class DistillTrainer:
     """
     Trainer for renderer distillation.
