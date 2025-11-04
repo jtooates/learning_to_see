@@ -241,7 +241,7 @@ class DistillTrainer:
         self.scheduler = None  # Will be set in train()
 
         # AMP scaler
-        self.scaler = GradScaler('cuda') if use_amp else None
+        self.scaler = GradScaler() if use_amp else None
 
         # EMA for decoder
         self.ema = EMA(decoder, decay=ema_decay)
