@@ -171,6 +171,7 @@ class DistillTrainer:
         weight_decay: Weight decay
         betas: Adam betas
         grad_clip: Gradient clipping value
+        pixel_weight: Pixel loss (L1+L2) weight
         tv_weight: TV loss weight
         perc_weight: Perceptual loss weight
         use_perc: Whether to use perceptual loss
@@ -192,8 +193,9 @@ class DistillTrainer:
         weight_decay: float = 0.05,
         betas: tuple = (0.9, 0.999),
         grad_clip: float = 1.0,
-        tv_weight: float = 1e-5,
-        perc_weight: float = 1e-3,
+        pixel_weight: float = 0.1,
+        tv_weight: float = 1e-4,
+        perc_weight: float = 1.0,
         use_perc: bool = True,
         use_amp: bool = True,
         ema_decay: float = 0.999,
@@ -217,6 +219,7 @@ class DistillTrainer:
 
         # Loss function
         self.criterion = DistillationLoss(
+            pixel_weight=pixel_weight,
             tv_weight=tv_weight,
             perc_weight=perc_weight,
             use_perc=use_perc,
