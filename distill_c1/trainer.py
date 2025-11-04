@@ -11,7 +11,8 @@ Handles:
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.cuda.amp import autocast, GradScaler
+from torch.amp import autocast
+from torch.cuda.amp import GradScaler
 from torch.utils.data import DataLoader, Dataset
 from pathlib import Path
 import json
@@ -246,7 +247,7 @@ class DistillTrainer:
 
         # Forward pass with AMP
         if self.use_amp:
-            with autocast():
+            with autocast('cuda'):
                 # Encode text
                 e = self.text_encoder(token_ids, pad_id=self.vocab.pad_id)
 

@@ -1,7 +1,8 @@
 """Training loop for captioner with AdamW, AMP, and scheduled sampling."""
 import torch
 import torch.nn as nn
-from torch.cuda.amp import autocast, GradScaler
+from torch.amp import autocast
+from torch.cuda.amp import GradScaler
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import OneCycleLR
 from pathlib import Path
@@ -122,7 +123,7 @@ class CaptionerTrainer:
 
             # Forward pass with AMP
             if self.use_amp:
-                with autocast():
+                with autocast('cuda'):
                     logits, loss = self.model(
                         images=images,
                         targets=targets,
@@ -204,7 +205,7 @@ class CaptionerTrainer:
             targets = batch['input_ids'].to(self.device)
 
             if self.use_amp:
-                with autocast():
+                with autocast('cuda'):
                     logits, loss = self.model(
                         images=images,
                         targets=targets,
