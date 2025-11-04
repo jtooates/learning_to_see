@@ -158,7 +158,8 @@ class DistillationLoss(nn.Module):
     optional random perceptual loss.
 
     Args:
-        pixel_weight: Weight for pixel loss (L1+L2) (default: 0.1)
+        l1_weight: Weight for L1 pixel loss (default: 0.05)
+        l2_weight: Weight for L2 pixel loss (default: 0.05)
         tv_weight: Weight for TV loss (default: 1e-4)
         perc_weight: Weight for perceptual loss (default: 1.0)
         use_perc: Whether to use perceptual loss (default: True)
@@ -166,13 +167,15 @@ class DistillationLoss(nn.Module):
 
     def __init__(
         self,
-        pixel_weight: float = 0.1,
+        l1_weight: float = 0.05,
+        l2_weight: float = 0.05,
         tv_weight: float = 1e-4,
         perc_weight: float = 1.0,
         use_perc: bool = True,
     ):
         super().__init__()
-        self.pixel_weight = pixel_weight
+        self.l1_weight = l1_weight
+        self.l2_weight = l2_weight
         self.tv_weight = tv_weight
         self.perc_weight = perc_weight
         self.use_perc = use_perc
@@ -203,19 +206,15 @@ class DistillationLoss(nn.Module):
         l1_loss = pixel_dict['l1']
         l2_loss = pixel_dict['l2']
 
-        # Combined pixel loss (equal weight between L1 and L2)
-        pixel_loss = 0.5 * l1_loss + 0.5 * l2_loss
-
         # TV loss
         tv = tv_loss(pred)
 
-        # Total loss (apply pixel_weight to make it less dominant)
-        total_loss = self.pixel_weight * pixel_loss + self.tv_weight * tv
+        # Total loss with separate L1 and L2 weights
+        total_loss = self.l1_weight * l1_loss + self.l2_weight * l2_loss + self.tv_weight * tv
 
         # Loss dictionary for logging
         loss_dict = {
             'total': total_loss.item(),
-            'pixel': pixel_loss.item(),
             'l1': l1_loss.item(),
             'l2': l2_loss.item(),
             'tv': tv.item(),

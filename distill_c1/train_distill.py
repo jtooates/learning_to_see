@@ -60,6 +60,10 @@ def main():
                         help='Gradient clipping value')
 
     # Loss weights
+    parser.add_argument('--l1', type=float, default=0.05,
+                        help='L1 pixel loss weight')
+    parser.add_argument('--l2', type=float, default=0.05,
+                        help='L2 pixel loss weight')
     parser.add_argument('--tv', type=float, default=1e-5,
                         help='TV loss weight')
     parser.add_argument('--perc', type=float, default=1e-3,
@@ -196,6 +200,8 @@ def main():
         lr=args.lr,
         weight_decay=args.wd,
         grad_clip=args.grad_clip,
+        l1_weight=args.l1,
+        l2_weight=args.l2,
         tv_weight=args.tv,
         perc_weight=args.perc,
         use_perc=not args.no_perc,
