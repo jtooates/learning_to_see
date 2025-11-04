@@ -17,11 +17,11 @@ import tempfile
 import shutil
 from pathlib import Path
 
-from .text_encoder import build_text_encoder
-from .decoder import build_decoder
-from .losses import pixel_losses, tv_loss, rand_perc_loss, TinyRandNet, DistillationLoss
-from .metrics import compute_psnr, compute_ssim
-from .trainer import EMA
+from distill_c1.text_encoder import build_text_encoder
+from distill_c1.decoder import build_decoder
+from distill_c1.losses import pixel_losses, tv_loss, rand_perc_loss, TinyRandNet, DistillationLoss
+from distill_c1.metrics import compute_psnr, compute_ssim
+from distill_c1.trainer import EMA
 
 
 class TestShapes(unittest.TestCase):
@@ -368,7 +368,7 @@ class TestArchitecture(unittest.TestCase):
         decoder = build_decoder()
 
         # Count FiLM layers
-        from .decoder import FiLM
+        from distill_c1.decoder import FiLM
         film_count = sum(1 for m in decoder.modules() if isinstance(m, FiLM))
 
         # Should have 3 FiLM layers (one per stage)
@@ -379,7 +379,7 @@ class TestArchitecture(unittest.TestCase):
         decoder = build_decoder()
 
         # Check for MHSA layer
-        from .decoder import MHSA2d
+        from distill_c1.decoder import MHSA2d
         mhsa_count = sum(1 for m in decoder.modules() if isinstance(m, MHSA2d))
 
         # Should have 1 MHSA layer in stage 2
