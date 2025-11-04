@@ -1,0 +1,67 @@
+# Default configuration for renderer distillation training
+
+# Trainer settings
+trainer:
+  lr: 3.0e-4              # Learning rate
+  wd: 0.05                # Weight decay
+  betas: [0.9, 0.999]     # Adam betas
+  batch: 192              # Batch size
+  steps: 100000           # Total training steps
+  warmup: 1000            # Warmup steps
+  grad_clip: 1.0          # Gradient clipping value
+  ema: 0.999              # EMA decay rate
+  eval_every: 2000        # Evaluate every N steps
+  num_workers: 4          # Data loading workers
+
+# Loss weights
+loss:
+  tv: 1.0e-5              # Total variation loss weight
+  perc: 1.0e-3            # Random perceptual loss weight
+  kl: 0.0                 # KL loss weight (unused, reserved for future)
+
+# Model architecture
+model:
+  emb_dim: 512            # Text embedding dimension
+  base_ch: 256            # Base channels in decoder
+  start_hw: 8             # Starting spatial size (8×8)
+  attn_heads: 4           # Number of attention heads in MHSA
+  use_perc: true          # Whether to use perceptual loss
+
+# Text encoder settings
+text_encoder:
+  d_model: 256            # Model dimension
+  nhead: 4                # Number of attention heads
+  dim_ff: 512             # Feedforward dimension
+  num_layers: 4           # Number of transformer layers
+  dropout: 0.1            # Dropout rate
+  max_len: 40             # Maximum sequence length
+
+# Decoder settings
+decoder:
+  num_groups: 32          # Number of groups for GroupNorm
+
+# Training settings
+training:
+  use_amp: true           # Use automatic mixed precision
+  seed: 1337              # Random seed
+  device: cuda            # Device (cuda or cpu)
+
+# Data settings
+data:
+  max_seq_len: 32         # Maximum sequence length for captions
+
+# Paths
+paths:
+  data_dir: data/scenes   # Directory containing scene data
+  save_dir: runs/distill_c1  # Directory to save checkpoints and logs
+
+# Acceptance criteria (for reference)
+acceptance:
+  psnr_threshold: 24.0    # Minimum PSNR (dB)
+  ssim_threshold: 0.92    # Minimum SSIM
+  description: |
+    - Validation PSNR ≥ 24 dB and SSIM ≥ 0.92
+    - Counterfactual edits induce localized visual changes
+    - No checkerboard artifacts
+    - Good compositional generalization
+    - Stable spectral characteristics
