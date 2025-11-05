@@ -24,7 +24,8 @@ class SceneDataset(Dataset):
                  split: str = 'train',
                  vocab: Optional[Vocab] = None,
                  max_seq_len: int = 32,
-                 image_transforms: Optional[Callable] = None):
+                 image_transforms: Optional[Callable] = None,
+                 max_cache_shards: Optional[int] = None):
         """Initialize dataset.
 
         Args:
@@ -33,6 +34,7 @@ class SceneDataset(Dataset):
             vocab: Vocabulary for tokenization
             max_seq_len: Maximum sequence length (for padding)
             image_transforms: Optional image augmentation transforms
+            max_cache_shards: Max number of shards to cache. None = cache all shards.
         """
         self.data_dir = Path(data_dir)
         self.split = split
@@ -67,6 +69,19 @@ class SceneDataset(Dataset):
 
         # Cache for loaded shards
         self._shard_cache = {}
+
+        # Set cache limit (None = unlimited, cache all shards)
+        if max_cache_shards is None:
+            # Default: cache all shards if dataset is reasonably small
+            # Heuristic: cache all if < 20 shards (typically < 20k samples)
+            self.max_cache_shards = None if self.n_shards < 20 else 10
+        else:
+            self.max_cache_shards = max_cache_shards
+
+        if self.max_cache_shards is None:
+            print(f"  Shard cache: unlimited (will cache all {self.n_shards} shards)")
+        else:
+            print(f"  Shard cache: up to {self.max_cache_shards} shards")
 
     def _load_shard(self, shard_idx: int) -> Dict[str, Any]:
         """Load a shard from disk (with caching).
@@ -103,13 +118,18 @@ class SceneDataset(Dataset):
             'metadata': metadata
         }
 
-        # Cache (simple LRU: keep last 3 shards)
-        if len(self._shard_cache) >= 3:
-            # Remove oldest
-            oldest_key = next(iter(self._shard_cache))
-            del self._shard_cache[oldest_key]
+        # Cache management
+        if self.max_cache_shards is None:
+            # Unlimited cache - keep all shards
+            self._shard_cache[shard_idx] = shard_data
+        else:
+            # Limited cache - simple LRU eviction
+            if len(self._shard_cache) >= self.max_cache_shards:
+                # Remove oldest
+                oldest_key = next(iter(self._shard_cache))
+                del self._shard_cache[oldest_key]
 
-        self._shard_cache[shard_idx] = shard_data
+            self._shard_cache[shard_idx] = shard_data
 
         return shard_data
 
